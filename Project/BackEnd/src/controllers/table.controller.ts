@@ -78,9 +78,14 @@ export const editTable = async (req: Request, res: Response, next: NextFunction)
     }
 
     if (status !== undefined) {
-      table.status = Boolean(status);
+      if (status === "true" || status === true) {
+        table.status = true;
+      } else if (status === "false" || status === false) {
+        table.status = false;
+      } else {
+        throw new ApiError(400, "Invalid status value");
+      }
     }
-
     if (waiterId !== undefined) {
       const waiter = await userRepo.findOne({ where: { id: waiterId } });
 
@@ -91,7 +96,7 @@ export const editTable = async (req: Request, res: Response, next: NextFunction)
        if(waiter?.role !== UserRoles.WAITER){
         throw new ApiError(404, " User is not waiter")
       }
-
+      
       table.assignedWaiter = waiter;
     }
 

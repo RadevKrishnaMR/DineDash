@@ -45,7 +45,7 @@ export const login = async (req: Request, res: Response): Promise<void> =>{
         
         res.cookie('refreshToken', tokens.refreshToken ,{
             httpOnly: true,
-            maxAge: 1000 * 60 * 3
+            maxAge: 1000 * 60 * 10
         })
         res.json({
             status: "success",
@@ -121,6 +121,11 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
 
 export const logout = async (req: Request, res: Response): Promise<void> =>{
+    try{
+
+    if(!(req.cookies.refreshToken)){
+        throw new ApiError(404, "Token not found.")
+    }
     res.clearCookie('refreshToken', {
         httpOnly: true,
     })
@@ -128,6 +133,13 @@ export const logout = async (req: Request, res: Response): Promise<void> =>{
         message: "Logged Out successfully...."
     })
     return 
+    }catch (err: any) {
+    console.log(chalk.red("Refresh Token Error", err));
+    if (!(err instanceof ApiError)) {
+        throw new ApiError(500, "Unexpected error during token refresh");
+    }
+    throw err;
+}
 }
 
 
@@ -142,12 +154,12 @@ export const refreshToken = async (req: Request, res: Response): Promise<void>=>
 
         
         const payload: any = verifyRefreshToken(token);
-
-        const tokens = createToken(payload)
+        const {exp, iat, ...safePayload} = payload
+        const tokens = createToken(safePayload)
     
         res.cookie("refreshToken",tokens.refreshToken,{
             httpOnly: true,
-            maxAge: 1000* 60 * 3
+            maxAge: 1000* 60 * 10
         }).json({
             status: "success",
             data: {

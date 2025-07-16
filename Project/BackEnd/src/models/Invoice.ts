@@ -17,7 +17,11 @@ export class Invoice{
     @JoinColumn()
     order! : Order
 
-    @Column()
+    @Column({
+    type: 'numeric',
+    precision: 10, 
+    scale: 2       
+})
     totalAmount! : number
     
     @Column()

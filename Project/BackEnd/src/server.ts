@@ -16,7 +16,7 @@ const startServer = async () => {
         console.log(chalk.yellowBright("DATA SOURCE INITIALIZED"));
 
         app.listen(PORT,()=>{
-            console.log(chalk.blueBright("THE SERVER IS RUNNING..."))
+            console.log(chalk.blueBright(`THE SERVER IS RUNNING IN ${PORT}`))
         })
 
     }catch(err){

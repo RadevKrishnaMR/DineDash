@@ -10,30 +10,33 @@ export async function createInvoicePDF(invoiceData: any, fileName: string): Prom
     return new Promise((resolve, reject) => {
         try {
             const doc = new PDFDocument();
-            const invoicesDir = path.join(__dirname, "..", "invoices");
+            const invoicesDir = path.join(__dirname, "..", "..", "invoices");
+
 
             // Ensure folder exists
             if (!fs.existsSync(invoicesDir)) {
-                fs.mkdirSync(invoicesDir);
+                fs.mkdirSync(invoicesDir, { recursive: true });
             }
 
             const filePath = path.join(invoicesDir, fileName);
             const stream = fs.createWriteStream(filePath);
+            const tax = process.env.TAX
             doc.pipe(stream);
 
             doc.fontSize(25).text("Restaurant Invoice", { align: "center" });
             doc.moveDown();
 
             doc.fontSize(14).text(`Order ID: ${invoiceData.orderId}`);
-            doc.text(`Total Amount: ₹${invoiceData.totalAmount}`);
-            doc.text(`Discount: ₹${invoiceData.discount}`);
-            doc.text(`Final Payable: ₹${invoiceData.totalAmount - invoiceData.discount}`);
+            doc.text(`Total Amount: INR ${invoiceData.totalAmount}`);
+            doc.text(`Tax Percentage: INR ${tax}`);
+            doc.text(`Discount: INR ${invoiceData.discount}`);
+            doc.text(`Final Payable: INR ${invoiceData.totalAmount - invoiceData.discount}`);
             doc.text(`Payment Mode: ${invoiceData.paymentMode}`);
             doc.moveDown();
 
             doc.text("Items:");
             invoiceData.items.forEach((item: any) => {
-                doc.text(`- ${item.name} x ${item.quantity} = ₹${item.cost * item.quantity}`);
+                doc.text(`- ${item.name} x ${item.quantity} = INR ${item.cost * item.quantity}`);
             });
 
             doc.end();

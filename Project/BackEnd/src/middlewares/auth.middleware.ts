@@ -11,9 +11,10 @@ export const authenticateJWT = (req: AUthRequest, res: Response, next: NextFunct
     const authHeader = req.headers.authorization;
 
     if(!authHeader || !authHeader.startsWith("Bearer")){
-        return res.status(401).json({
+        res.status(401).json({
             message: "No token provided or Invalid token"
         })
+        return ;
     }
 
     const token = authHeader.split(" ")[1]
@@ -22,9 +23,10 @@ export const authenticateJWT = (req: AUthRequest, res: Response, next: NextFunct
 
      if (!decoded) {
         console.log(chalk.red("ACCESS TOKEN VERIFICATION FAILED"));
-        return res.status(401).json({
+        res.status(401).json({
             message: "Invalid or expired token"
         });
+        return
     }
 
     req.user = decoded;

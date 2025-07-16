@@ -6,7 +6,7 @@ import { ApiError } from "../utils/ApiError";
 import chalk from "chalk";
 import { isValidCategory } from "../utils/menu.util";
 
-
+// function for api , csv bulk upload 
 
 export const getMenu = async(req: Request, res: Response, next: NextFunction): Promise<void>=>{
     try{
@@ -38,9 +38,9 @@ export const getMenu = async(req: Request, res: Response, next: NextFunction): P
 export const addMenu = async(req: Request, res: Response, next: NextFunction): Promise<void> =>{
     try{
         const menuRepo = AppDataSource.getRepository(Items)
-        const {name, description, category} = req.body;
+        const {name, description, category,cost} = req.body;
 
-        if(!name || !description || !category){
+        if(!name || !description || !category||!cost){
             throw new ApiError(400,"Given data is not sufficient");
         }
 
@@ -53,6 +53,7 @@ export const addMenu = async(req: Request, res: Response, next: NextFunction): P
         newItem.name = name;
         newItem.description = description;
         newItem.category = category;
+        newItem.cost = cost
         newItem.available = true
 
         const savedItem = await menuRepo.save(newItem)
@@ -85,7 +86,15 @@ export const deleteItem = async(req: Request, res: Response, next: NextFunction)
         if (!itemId || isNaN(itemId)) {
             throw new ApiError(400, "Invalid ID parameter");
         }
+        const item = await menuRepo.findOne({
+            where:{
+                id: itemId
+            }
+        })
 
+        if(!item){
+            throw new ApiError(404,'Item not found.')
+        }
 
         const delItem = await menuRepo.delete(itemId) 
 
@@ -96,7 +105,7 @@ export const deleteItem = async(req: Request, res: Response, next: NextFunction)
         res.status(200).json({
             status: 'success',
             message: 'Item deleted successfully',
-            data : delItem,
+            data : item,
         })
     }catch(err){
         console.log(chalk.red("Unexpected server error occured", err))
@@ -109,5 +118,5 @@ export const deleteItem = async(req: Request, res: Response, next: NextFunction)
     
 }
 
-// function for api , csv bulk upload 
+
 

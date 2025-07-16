@@ -9,7 +9,7 @@ if(!ACCESS_KEY || !REFRESH_KEY ){
     throw new Error("ACCESS KEY AND REFRESH KEY MUST BE SET IN ENV!!!")
 }
 
-export const generateAccessToken = (payload: object, expiresIn: any= "20sec")=>{
+export const generateAccessToken = (payload: object, expiresIn: any= "5min")=>{
     const options: SignOptions = {
         expiresIn,
         algorithm: 'HS512'
@@ -19,7 +19,7 @@ export const generateAccessToken = (payload: object, expiresIn: any= "20sec")=>{
 }
 
 
-export const generateRefreshToken = (payload: object, expiresIn: any = "3min")=>{
+export const generateRefreshToken = (payload: object, expiresIn: any = "10min")=>{
     const options: SignOptions = {
         expiresIn,
         algorithm: 'HS512'

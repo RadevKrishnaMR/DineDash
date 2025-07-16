@@ -15,10 +15,14 @@ export const generateInvoice = async(req: Request, res: Response, next: NextFunc
     try{
         const orderRepo = AppDataSource.getRepository(Order)
         const invoiceRepo = AppDataSource.getRepository(Invoice)
-
+        let tax = process.env.TAX
         const {id} = req.params
         const {reqDiscount,paymentMode, isPaid} = req.body
         const orderId = Number(id)
+
+        if(reqDiscount){
+            tax = reqDiscount
+        }
 
         if(!isValidCategory(paymentMode)){
             throw new ApiError(404,"Invalid or missing Payment mode")
@@ -57,13 +61,15 @@ export const generateInvoice = async(req: Request, res: Response, next: NextFunc
         if (isNaN(discount) || discount < 0 || discount > 100) {
             throw new ApiError(400, "Invalid discount value, must be between 0 and 100");
         }
-                const finalCost = (totalCost * (100 - discount))/ 100 ;
+
+                const calculatedCost = (totalCost * (100 - discount))/ 100
+                const finalCost = (calculatedCost * (100 + Number(tax)))/100 ;
 
         const fileName = `invoice_order_${currentOrder.id}_${Date.now()}.pdf`;
         const filePath = await createInvoicePDF(
             {
                 orderId: currentOrder.id,
-                totalAmount: totalCost,
+                totalAmount: finalCost,
                 discount,
                 paymentMode,
                 items: currentItems.map(item => ({

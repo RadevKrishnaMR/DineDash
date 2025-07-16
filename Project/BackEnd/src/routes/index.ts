@@ -1,1 +1,5 @@
 export * from './auth/auth.routes'
+export * from './order/order.routes'
+export * from './menu/menu.routes'
+export * from './invoice/invoice.routes'
+export * from './table/table.routes'

@@ -351,3 +351,41 @@ export const getFilteredOrders = async (req: Request, res: Response, next: NextF
     }
 
 }
+
+export const deleteOrder = async(req: Request, res: Response, next: NextFunction): Promise<void> =>{
+    try{
+    const orderRepo = AppDataSource.getRepository(Order)
+    const {reqId} = req.params
+    const id = Number(reqId)
+
+
+
+    const selectOrder = await  orderRepo.findOne({
+        where:{
+            id
+        }
+    })
+
+    if(!selectOrder){
+        throw new ApiError(404,"Order Not Found.")
+    }
+    await orderRepo.delete(id)
+
+    res.status(200).json({
+        status : "success",
+        message: 'The selected order deleted successfully',
+        data:{
+            deletedOrde: selectOrder
+        }
+
+    })
+
+    }catch(err){
+        console.log(chalk.red("Unexpected error occured."))
+        if(!(err instanceof ApiError)){
+           return next( new ApiError(500,"Unexpected server error occured"))
+        }
+        return next(err)
+    }
+
+}
