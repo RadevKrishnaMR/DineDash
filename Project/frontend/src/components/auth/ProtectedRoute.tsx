@@ -3,9 +3,11 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/useAuth';
 import LoadingSpinner from '../ui/LoadingSpinner';
 
+type Role = 'Admin' | 'Cashier' | 'Waiter' | 'Kitchen';
+
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredRole?: 'admin' | 'cashier' | 'waiter' | 'kitchen';
+  requiredRole?: Role | Role[];
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole }) => {
@@ -24,7 +26,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole 
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  if (requiredRole && user?.role !== requiredRole) {
+  // Normalize role check
+  const rolesArray = Array.isArray(requiredRole) ? requiredRole : requiredRole ? [requiredRole] : [];
+
+  if (rolesArray.length > 0 && !rolesArray.includes(user?.role as Role)) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -33,7 +38,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredRole 
             You don't have permission to access this page.
           </p>
           <p className="text-sm text-gray-500">
-            Required role: {requiredRole} | Your role: {user?.role}
+            Required role(s): {rolesArray.join(', ')} | Your role: {user?.role}
           </p>
         </div>
       </div>

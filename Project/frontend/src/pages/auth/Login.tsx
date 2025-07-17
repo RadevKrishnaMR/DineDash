@@ -1,7 +1,7 @@
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Link, useNavigate, useLocation } from 'react-router-dom'
+import { Link, useNavigate,} from 'react-router-dom'
 import { useAuth } from '../../context/useAuth'
 import { Button } from '../../components/ui/Button'
 // import { Input } from '../../components/ui/Input'
@@ -20,8 +20,8 @@ type LoginFormData = z.infer<typeof loginSchema>
 export default function Login() {
   const { login } = useAuth()
   const navigate = useNavigate()
-  const location = useLocation()
-  const from = location.state?.from?.pathname || '/'
+  // const location = useLocation()
+  // const from = location.state?.from?.pathname || '/'
 
   const {
     register,
@@ -32,28 +32,49 @@ export default function Login() {
   })
 
   const onSubmit = async (data: LoginFormData) => {
-    try {
-      await toast.promise(
-        login({
-          email: data.email,
-          password: data.password,
-        }),
-        {
-          loading: 'Authenticating...',
-          success: () => {
-            navigate(from, { replace: true })
-            return 'Login successful!'
-          },
-          error: (error) => {
-            console.error('Login failed:', error)
-            return error.message || 'Invalid credentials'
-          },
+  try {
+    await toast.promise(
+      login({
+        email: data.email,
+        password: data.password,
+      }).then((res) => {
+        const user = res.user; // This assumes your `login` returns { user, token }
+
+        // Role-based redirection
+        switch (user.role) {
+          case 'Admin':
+            navigate('/dashboard/admin', { replace: true })
+            break
+          case 'Cashier':
+            navigate('/dashboard/cashier', { replace: true })
+            break
+          case 'Waiter':
+            navigate('/dashboard/waiter', { replace: true })
+            break
+          case 'Kitchen':
+            navigate('//dashboard/kitchen', { replace: true })
+            break
+          default:
+            navigate('/dashboard', { replace: true })
+            break
         }
-      )
-    } catch (error) {
-      console.error('Login failed:', error)
-    }
+
+        return 'Login successful!'
+      }),
+      {
+        loading: 'Authenticating...',
+        success: () => '', // handled in .then()
+        error: (error) => {
+          console.error('Login failed:', error)
+          return error.message || 'Invalid credentials'
+        },
+      }
+    )
+  } catch (error) {
+    console.error('Login failed:', error)
   }
+}
+
 
   return (
     <motion.div

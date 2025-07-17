@@ -2,7 +2,7 @@ export interface User {
     id: string;
     name: string;
     email: string;
-    role: 'admin' | 'cashier' | 'waiter' | 'kitchen';
+    role: 'Admin' | 'Cashier' | 'Waiter' | 'Kitchen';
     createdAt: string;
 }
 
@@ -23,11 +23,15 @@ export interface RegisterCredentials {
     name: string;
     email: string;
     password: string;
-    confirmPassword: string;
-    role: 'admin' | 'cashier' | 'waiter' | 'kitchen';
+    // confirmPassword: string;
+    role: 'Admin' | 'Cashier' | 'Waiter' | 'Kitchen';
 }
 
 export interface AuthResponse {
+    data : {
+        token: string;
+        user: User;
+    };
     user: User;
     token: string;
     message: string;

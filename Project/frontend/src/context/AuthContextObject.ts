@@ -1,9 +1,9 @@
 import { createContext } from 'react';
-import type { AuthState, LoginCredentials, RegisterCredentials } from '../types/auth';
+import type { User, AuthState, LoginCredentials, RegisterCredentials } from '../types/auth';
 
 export interface AuthContextType extends AuthState {
-  login: (credentials: LoginCredentials) => Promise<void>;
-  register: (credentials: RegisterCredentials) => Promise<void>;
+  login: (credentials: LoginCredentials) => Promise<{ user: User; token: string }>;
+  register: (credentials: RegisterCredentials) => Promise<{ user: User; token: string }>;
   logout: () => void;
   clearError: () => void;
   error: string | null;

@@ -1,9 +1,10 @@
 import axios from 'axios';
 import type { LoginCredentials, RegisterCredentials, AuthResponse } from '../../src/types/auth';
 
-const API_BASE_URL = 'http://localhost:6321/api'; // Replace with your backend URL
-
+const API_BASE_URL = import.meta.env.VITE_API_BASE; 
+console.log(API_BASE_URL)
 const api = axios.create({
+  // baseURL: "http://localhost:6321/api",
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
@@ -37,23 +38,23 @@ api.interceptors.response.use(
 
 export const authAPI = {
   login: async (credentials: LoginCredentials): Promise<AuthResponse> => {
-    const response = await api.post('/auth/login', credentials);
+    const response = await api.post('/login', credentials);
     return response.data;
   },
 
   register: async (credentials: RegisterCredentials): Promise<AuthResponse> => {
-    const response = await api.post('/auth/register', credentials);
+    const response = await api.post('/register', credentials);
     return response.data;
   },
 
   logout: async (): Promise<void> => {
-    await api.post('/auth/logout');
+    await api.post('/logout');
   },
 
-  verifyToken: async (): Promise<AuthResponse> => {
-    const response = await api.get('/auth/verify');
-    return response.data;
-  },
+  // verifyToken: async (): Promise<AuthResponse> => {
+  //   const response = await api.get('/auth/verify');
+  //   return response.data;
+  // },
 };
 
 export default api;

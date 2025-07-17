@@ -1,20 +1,15 @@
-import React from 'react'
-import { Outlet } from 'react-router-dom'
-import Header from './Header' // your custom header
-// import Sidebar from './Sidebar' // optional, if you have a sidebar
+// import React from 'react';
+import { Outlet } from 'react-router-dom';
 
-export const DashboardLayout: React.FC = () => {
+const DashboardLayout = () => {
   return (
     <div className="flex min-h-screen">
-      {/* Example sidebar */}
-      {/* <Sidebar /> */}
-
-      <div className="flex flex-col flex-1">
-        <Header />
-        <main className="flex-1 p-6 bg-gray-50">
-          <Outlet /> {/* Renders nested dashboard pages */}
-        </main>
-      </div>
+      {/* You can import and use a sidebar/header here */}
+      <main className="flex-1 p-6">
+        <Outlet />
+      </main>
     </div>
-  )
-}
+  );
+};
+
+export default DashboardLayout;
