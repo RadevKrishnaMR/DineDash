@@ -95,48 +95,49 @@ const refreshToken = useCallback(async () => {
   }
 }, [logout]);
 
+useEffect(() => {
+  const token = localStorage.getItem('dinedash_token');
+  const userData = localStorage.getItem('dinedash_user');
 
-  useEffect(() => {
-    const token = localStorage.getItem('dinedash_token');
-    const userData = localStorage.getItem('dinedash_user');
+  if (!token || !userData || userData === 'undefined') {
+    // Don't log out here; user might be registering or logging in
+    return;
+  }
 
-    if (token && userData && userData !== 'undefined') {
-      try {
-        const decoded: { exp: number } = jwtDecode(token);
-        if (!decoded.exp) throw new Error('Token missing exp claim');
+  try {
+    const decoded: { exp: number } = jwtDecode(token);
+    if (!decoded.exp) throw new Error('Token missing exp claim');
 
-        const expiryTime = decoded.exp * 1000;
-        const now = Date.now();
+    const expiryTime = decoded.exp * 1000;
+    const now = Date.now();
 
-        if (expiryTime < now) {
-          console.warn('Token expired. Refreshing now...');
-          refreshToken();
-        } else {
-          dispatch({
-            type: 'SET_USER',
-            payload: { user: JSON.parse(userData), token },
-          });
-
-          const timeUntilRefresh = expiryTime - now - 60_000;
-          if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
-          refreshTimerRef.current = setTimeout(() => {
-            refreshToken();
-          }, Math.max(timeUntilRefresh, 0));
-        }
-      } catch (err) {
-        console.error('JWT decode or user parse failed:', err);
-        logout();
-      }
+    if (expiryTime < now) {
+      console.warn('Token expired. Refreshing now...');
+      refreshToken();
     } else {
-      logout();
-    }
+      dispatch({
+        type: 'SET_USER',
+        payload: { user: JSON.parse(userData), token },
+      });
 
-    return () => {
-      if (refreshTimerRef.current) {
-        clearTimeout(refreshTimerRef.current);
-      }
-    };
-  }, [refreshToken,logout]);
+      const timeUntilRefresh = expiryTime - now - 60_000;
+      if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
+      refreshTimerRef.current = setTimeout(() => {
+        refreshToken();
+      }, Math.max(timeUntilRefresh, 0));
+    }
+  } catch (err) {
+    console.error('JWT decode or user parse failed:', err);
+    logout(); // optional fallback
+  }
+
+  return () => {
+    if (refreshTimerRef.current) {
+      clearTimeout(refreshTimerRef.current);
+    }
+  };
+}, [refreshToken, logout]);
+
 
   const login = async (credentials: LoginCredentials): Promise<{ user: User; token: string }> => {
   try {
@@ -177,6 +178,7 @@ const refreshToken = useCallback(async () => {
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
       const response = await authAPI.register(credentials);
+      console.log(response)
 
       localStorage.setItem('dinedash_token', response.data.token);
       localStorage.setItem('dinedash_user', JSON.stringify(response.data.user));

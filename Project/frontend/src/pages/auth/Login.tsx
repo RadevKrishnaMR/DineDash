@@ -52,7 +52,7 @@ export default function Login() {
             navigate('/dashboard/waiter', { replace: true })
             break
           case 'Kitchen':
-            navigate('//dashboard/kitchen', { replace: true })
+            navigate('/dashboard/kitchen', { replace: true })
             break
           default:
             navigate('/dashboard', { replace: true })

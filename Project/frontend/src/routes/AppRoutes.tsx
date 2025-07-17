@@ -4,6 +4,8 @@ import ProtectedRoute from '../components/auth/ProtectedRoute';
 import AuthLayout from '../components/layout/AuthLayout';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import RoleRedirect from '../components/auth/RoleRediredct';
+import { Navbar } from '../components';
+import Footer from '../components/Footer/Footer';
 
 // Lazy load all dashboards
 const Login = lazy(() => import('../pages/auth/Login'));
@@ -71,7 +73,8 @@ const AppRoutes = () => {
           {/* Optional default fallback route */}
           <Route index element={<RoleRedirect/>} />
         </Route>
-
+        <Route path="/navbar" element={<Navbar />} />
+        <Route path="/footer" element={<Footer />} />
         {/* Fallback Route */}
         <Route path="/" element={<RoleRedirect />} />
         <Route path="*" element={<RoleRedirect />} />
