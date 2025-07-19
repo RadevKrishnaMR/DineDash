@@ -6,6 +6,9 @@ import DashboardLayout from '../components/layout/DashboardLayout';
 import RoleRedirect from '../components/auth/RoleRediredct';
 import { Navbar } from '../components';
 import Footer from '../components/Footer/Footer';
+import OrdersPage from '../pages/dashboard/OrderPage';
+import MenuPage from '../pages/dashboard/MenuPage';
+import InvoiceDashboard from '../pages/dashboard/InvoicePage';
 
 // Lazy load all dashboards
 const Login = lazy(() => import('../pages/auth/Login'));
@@ -78,6 +81,9 @@ const AppRoutes = () => {
         {/* Fallback Route */}
         <Route path="/" element={<RoleRedirect />} />
         <Route path="*" element={<RoleRedirect />} />
+        <Route path="/order" element={<OrdersPage/>} />
+        <Route path="/menu" element={<MenuPage/>} />
+        <Route path="/invoice/:id" element={<InvoiceDashboard/>} />
       </Routes>
     </Suspense>
   );

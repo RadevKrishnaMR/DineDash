@@ -1,13 +1,98 @@
 import { motion } from "framer-motion";
 import Card from "../ui/Card";
+import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import axios from "axios";
+
+
+
+
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE; 
+
+const api = axios.create({
+  // baseURL: "http://localhost:6321/api",
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Request interceptor to add token to headers
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('dinedash_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// Response interceptor to handle auth errors
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('dinedash_token');
+      localStorage.removeItem('dinedash_user');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
+
+
+
+type StatCard = {
+  title: string;
+  value: string;
+  icon: string;
+  color: string;
+  path: string;
+};
+
+
+
+
 
 export const  AdminDashboard = () => {
-  const stats = [
-    { title: "Total Revenue", value: "$12,345", icon: "💰", color: "border-blue-500" },
-    { title: "Active Staff", value: "24", icon: "👨‍🍳", color: "border-green-500" },
-    { title: "Menu Items", value: "86", icon: "🍽️", color: "border-purple-500" },
-    { title: "Today's Orders", value: "142", icon: "📦", color: "border-yellow-500" },
+
+const [noOrder,setNoOrder] = useState(0);
+const [noMenu,setNoMenu] = useState(0);
+ useEffect(() => {
+ const fetchCounts = async ()=>{
+  try{
+    const [orderRes, menuRes] = await Promise.all([
+      api.get('/getAllOrder'),
+      api.get('/getMenu')
+    ]);
+    console.log("orderRes",orderRes, "menuRes",menuRes)
+    setNoOrder(orderRes.data.data.length || 0);
+    setNoMenu(menuRes.data.data.length || 0)
+  }catch(error){
+    console.log('Failed to fetch dashboard data', error);
+    
+  }
+ };
+ fetchCounts();
+
+  
+}, []);
+
+  const stats: StatCard[] = [
+    { title: "Total Revenue", value: "$12,345", icon: "💰", color: "border-blue-500", path: '/'},
+    { title: `Menu Item`, value: `${noMenu}`, icon: "🍽️", color: "border-purple-500", path: '/menu' },
+    { title: 'Order', value: `${noOrder}`, icon: "📦", color: "border-yellow-500", path: '/order' },
   ];
+  
+  const navigate = useNavigate();
+
+  const handleCardClick = (path: string) => {
+    navigate(path);
+  };
+
 
   return (
     <div>
@@ -19,7 +104,8 @@ export const  AdminDashboard = () => {
         Admin Overview
       </motion.h1>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 justify-center mb-8">
+
         {stats.map((stat, index) => (
           <motion.div
             key={stat.title}
@@ -27,7 +113,9 @@ export const  AdminDashboard = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
           >
-            <Card {...stat} />
+            <Card {...stat} 
+            onClick={() => handleCardClick(stat.path)}
+            />
           </motion.div>
         ))}
       </div>
@@ -64,10 +152,10 @@ export const  AdminDashboard = () => {
           <h3 className="font-semibold text-lg mb-4">Quick Actions</h3>
           <div className="grid grid-cols-2 gap-4">
             {[
-              { icon: '➕', title: 'Add Menu Item', action: () => {} },
+              { icon: '➕', title: 'Add Menu Item', action: () => {handleCardClick('/menu')} },
               { icon: '👨‍🍳', title: 'Manage Staff', action: () => {} },
               { icon: '📊', title: 'View Reports', action: () => {} },
-              { icon: '⚙️', title: 'Settings', action: () => {} },
+              
             ].map((action, i) => (
               <motion.button
                 key={i}

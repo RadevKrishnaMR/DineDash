@@ -95,54 +95,12 @@ const refreshToken = useCallback(async () => {
   }
 }, [logout]);
 
-useEffect(() => {
-  const token = localStorage.getItem('dinedash_token');
-  const userData = localStorage.getItem('dinedash_user');
-
-  if (!token || !userData || userData === 'undefined') {
-    // Don't log out here; user might be registering or logging in
-    return;
-  }
-
-  try {
-    const decoded: { exp: number } = jwtDecode(token);
-    if (!decoded.exp) throw new Error('Token missing exp claim');
-
-    const expiryTime = decoded.exp * 1000;
-    const now = Date.now();
-
-    if (expiryTime < now) {
-      console.warn('Token expired. Refreshing now...');
-      refreshToken();
-    } else {
-      dispatch({
-        type: 'SET_USER',
-        payload: { user: JSON.parse(userData), token },
-      });
-
-      const timeUntilRefresh = expiryTime - now - 60_000;
-      if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
-      refreshTimerRef.current = setTimeout(() => {
-        refreshToken();
-      }, Math.max(timeUntilRefresh, 0));
-    }
-  } catch (err) {
-    console.error('JWT decode or user parse failed:', err);
-    logout(); // optional fallback
-  }
-
-  return () => {
-    if (refreshTimerRef.current) {
-      clearTimeout(refreshTimerRef.current);
-    }
-  };
-}, [refreshToken, logout]);
-
-
-  const login = async (credentials: LoginCredentials): Promise<{ user: User; token: string }> => {
+  const login = useCallback(async (credentials: LoginCredentials): Promise<{ user: User; token: string }> => {
   try {
     dispatch({ type: 'SET_LOADING', payload: true });
     const response = await authAPI.login(credentials);
+    console.log("login success response :", response);
+    
 
     const { token, user } = response.data;
 
@@ -171,7 +129,53 @@ useEffect(() => {
     }
     throw error;
   }
-};
+},[]);
+
+
+useEffect(() => {
+  const token = localStorage.getItem('dinedash_token');
+  const userData = localStorage.getItem('dinedash_user');
+
+  if (!token || !userData || userData === 'undefined') {
+    // Don't log out here; user might be registering or logging in
+    return;
+  }
+
+  try {
+    const decoded: { exp: number } = jwtDecode(token);
+    if (!decoded.exp) throw new Error('Token missing exp claim');
+    console.log("decoded exp time",decoded.exp)
+    const expiryTime = decoded.exp * 1000;
+    const now = Date.now();
+
+    if (expiryTime < now) {
+      console.warn('Token expired. Refreshing now...');
+      refreshToken();
+    } else {
+      dispatch({
+        type: 'SET_USER',
+        payload: { user: JSON.parse(userData), token },
+      });
+
+      const timeUntilRefresh = expiryTime - now - 60_000;
+      if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
+      refreshTimerRef.current = setTimeout(() => {
+        refreshToken();
+      }, Math.max(timeUntilRefresh, 0));
+    }
+  } catch (err) {
+    console.error('JWT decode or user parse failed:', err);
+    logout(); // optional fallback
+  }
+
+  return () => {
+    if (refreshTimerRef.current) {
+      clearTimeout(refreshTimerRef.current);
+    }
+  };
+}, [refreshToken, logout,login]);
+
+
 
 
   const register = async (credentials: RegisterCredentials) => {
