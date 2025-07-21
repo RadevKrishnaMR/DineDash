@@ -8,12 +8,20 @@ import { authPath } from './routes/route.dir';
 import { invoiceRouter, menuRouter, orderRouter, tableRouter } from './routes';
 import { authenticateJWT } from './middlewares/auth.middleware';
 import path from 'path';
+import cors from 'cors';
 
 export const app = express()
+console.log(process.env.FRONT_URL);
+
+const corsOption={
+    // origin: 'http://localhost:5173',
+    origin: process.env.FRONT_URL,
+  credentials: true,
+}
 
 app.use(express.json())
 app.use(cookieParser())
-
+app.use(cors(corsOption))
 
 // Serve invoices folder statically
 app.use('/invoices', express.static(path.join(__dirname, '..', 'invoices')));

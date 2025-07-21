@@ -4,6 +4,7 @@ import {NextFunction, Request, Response} from 'express'
 import { isValidOrderStatus, isValidOrderType } from "../utils";
 import { ApiError } from "../utils/ApiError";
 import chalk from "chalk";
+import { OrderType } from "../models";
 
 
 
@@ -315,8 +316,8 @@ export const getFilteredOrders = async (req: Request, res: Response, next: NextF
 
         const {orderType, status, itemId, category} = req.query;
 
-        if(orderType && Object.values(orderType).includes(orderType as OrderType)){
-            query.andWhere('order.orderType = :orderType', {orderType})
+        if (orderType && Object.values(OrderType).includes(orderType as OrderType)) {
+        query.andWhere('order.orderType = :orderType', { orderType });
         }
 
         if(status && Object.values(OrderStatus).includes(status as OrderStatus)){

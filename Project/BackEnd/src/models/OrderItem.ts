@@ -17,9 +17,9 @@ export class OrderItems{
     @ManyToOne(()=>Order, (order)=> order.orderItems)
     order!: Order
 
-    @OneToOne(()=>Items)
+    @ManyToOne(() => Items, (item) => item.orderItems)
     @JoinColumn()
-    item! : Items
+    item!: Items;
 
     @Column()
     quantity!: number

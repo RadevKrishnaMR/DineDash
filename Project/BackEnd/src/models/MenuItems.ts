@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn } from "typeorm";
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from "typeorm";
+import { OrderItems } from "./OrderItem";
 
 
 export enum Category{
@@ -34,6 +35,9 @@ export class Items{
 
     @Column()
     available! : boolean
+
+    @OneToMany(() => OrderItems, (orderItem) => orderItem.item)
+    orderItems!: OrderItems[];
 
 
 

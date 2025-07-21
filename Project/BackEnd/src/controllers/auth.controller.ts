@@ -45,15 +45,19 @@ export const login = async (req: Request, res: Response): Promise<void> =>{
         
         res.cookie('refreshToken', tokens.refreshToken ,{
             httpOnly: true,
-            maxAge: 1000 * 60 * 10
+            maxAge: 1000 * 60 * 40,
+            sameSite: 'lax',        // "lax" for localhost; "none" if you're using HTTPS + cross-origin
+            secure: false 
         })
         res.json({
             status: "success",
             data:{
-                token: tokens.accessToken
+                token: tokens.accessToken,
+                user:payload
             }
             
         })
+        console.log("userlogged in", userFound, "cookie created",tokens,refreshToken )
         return
 
     }catch (err: any) {
@@ -102,10 +106,41 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
         await userRepo.save(newUser)
 
-        res.json({
-            status: 'success',
-            message: "Registration Successful"
+        const userFound = await userRepo.findOne({
+        where:{email}
+       })
+        if(!userFound){
+
+        throw new ApiError(404, "User not found")
+       }
+
+
+         const payload = {
+        id : userFound.id,
+        name: userFound.name,
+        email: userFound.email,
+        role: userRole,
+         }
+
+
+        const tokens = createToken(payload)
+        
+        res.cookie('refreshToken', tokens.refreshToken ,{
+            httpOnly: true,
+            maxAge: 1000 * 60 * 40,
+            sameSite: 'lax',        // "lax" for localhost; "none" if you're using HTTPS + cross-origin
+            secure: false 
+
         })
+        res.json({
+            status: "success",
+            data:{
+                token: tokens.accessToken,
+                user:payload
+            }
+            
+        })
+         console.log("user registered in", userFound, "cookie created",tokens,refreshToken )
         return 
 
     }catch (err: any) {
@@ -128,6 +163,8 @@ export const logout = async (req: Request, res: Response): Promise<void> =>{
     }
     res.clearCookie('refreshToken', {
         httpOnly: true,
+        sameSite: 'lax',        // "lax" for localhost; "none" if you're using HTTPS + cross-origin
+        secure: false 
     })
     res.json({
         message: "Logged Out successfully...."
@@ -159,12 +196,15 @@ export const refreshToken = async (req: Request, res: Response): Promise<void>=>
     
         res.cookie("refreshToken",tokens.refreshToken,{
             httpOnly: true,
-            maxAge: 1000* 60 * 10
+            maxAge: 1000* 60 * 10,
+            sameSite: 'lax',        // "lax" for localhost; "none" if you're using HTTPS + cross-origin
+            secure: false 
         }).json({
             status: "success",
             data: {
                 
-                  token: tokens.accessToken
+                  token: tokens.accessToken,
+                  user : safePayload
 
             }
           
