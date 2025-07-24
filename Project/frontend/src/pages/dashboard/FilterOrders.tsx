@@ -1,18 +1,31 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { FilterParams } from '../../types/order';
+
 const orderTypes = ['DinerIn', 'TakeAway', 'Delivery'] as const;
 const orderStatuses = ['Pending', 'InKitchen', 'Ready', 'Served', 'Billed'] as const;
-const categories = ['Food', 'Drink', 'Dessert']; // Adjust based on your actual categories
+const categories = ['Starter', 'MainCourse', 'Bread','Beverages','Burgers','Pastries'];
 
-const FilterOrders = ({ onFilterChange }: { 
-  onFilterChange: (filters: FilterParams) => void 
-}) => {
+type Props = {
+  onFilterChange: (filters: FilterParams) => void;
+  currentFilters: FilterParams;
+};
+
+const FilterOrders = ({ onFilterChange, currentFilters }: Props) => {
   const [filters, setFilters] = useState({
     orderType: '',
     status: '',
     itemId: '',
     category: ''
   });
+
+  useEffect(() => {
+    setFilters({
+      orderType: currentFilters.orderType || '',
+      status: currentFilters.status || '',
+      itemId: currentFilters.itemId || '',
+      category: currentFilters.category || ''
+    });
+  }, [currentFilters]);
 
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -21,9 +34,8 @@ const FilterOrders = ({ onFilterChange }: {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Convert empty strings to undefined for the API
     const apiFilters = Object.fromEntries(
-      Object.entries(filters).map(([key, value]) => 
+      Object.entries(filters).map(([key, value]) =>
         [key, value === '' ? undefined : value]
       )
     );
@@ -31,12 +43,13 @@ const FilterOrders = ({ onFilterChange }: {
   };
 
   const handleReset = () => {
-    setFilters({
+    const resetFilters = {
       orderType: '',
       status: '',
       itemId: '',
       category: ''
-    });
+    };
+    setFilters(resetFilters);
     onFilterChange({});
   };
 
@@ -58,7 +71,7 @@ const FilterOrders = ({ onFilterChange }: {
             ))}
           </select>
         </div>
-        
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
           <select
@@ -73,7 +86,7 @@ const FilterOrders = ({ onFilterChange }: {
             ))}
           </select>
         </div>
-        
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Item ID</label>
           <input
@@ -86,7 +99,7 @@ const FilterOrders = ({ onFilterChange }: {
             min="1"
           />
         </div>
-        
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
           <select
@@ -101,7 +114,7 @@ const FilterOrders = ({ onFilterChange }: {
             ))}
           </select>
         </div>
-        
+
         <div className="flex items-end space-x-2 md:col-span-2 lg:col-span-4">
           <button
             type="submit"

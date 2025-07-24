@@ -41,15 +41,19 @@ const Navbar: React.FC = () => {
         <div className="flex items-center justify-between h-20">
           {/* Logo and mobile menu button */}
           <div className="flex items-center">
+            <a href="/rollback">
             <div className="flex-shrink-0 flex items-center">
               <img src="https://png.pngtree.com/png-clipart/20250104/original/pngtree-cartoon-chef-vector-material-png-image_5469225.png" alt="Logo" className="h-17 w-auto mr-3" />
-              <span className="text-2xl font-bold text-gray-800">DineDash</span>
+              <span className="text-4xl font-bold text-gray-800">DineDash</span>
             </div>
+            </a>
           </div>
 
           {/* Desktop Navigation */}
           <div className="hidden md:block">
-            <div className="ml-10 flex items-center space-x-8">
+            <div className="ml-6 flex items-center space-x-7">
+              {/* <span className="text-2xl font-bold text-gray-800">A Total Hotel Management System</span> */}
+              
               {navLinks.map((link) => (
                 <Link
                   key={link.name}

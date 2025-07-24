@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import { AxiosError } from "axios";
 import axios from "axios";
 import type { FC } from "react";
+import { Navbar } from "../../components";
+import Papa from 'papaparse'
+import {toast} from 'react-toastify'
 
 const API_BASE = import.meta.env.VITE_API_BASE;
 
@@ -92,7 +95,8 @@ const categoryOptions = [
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">Menu Management</h1>
+      <Navbar/>
+      <h1 className="text-2xl font-bold mb-6 pt-30">Menu Management</h1>
 
      {/* Add Item Form */}
 <div className="mb-6 p-4 border rounded-lg bg-white shadow-sm grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -152,6 +156,56 @@ const categoryOptions = [
     </button>
   </div>
 </div>
+{/* Bulk CSV Upload */}
+<div className="mb-6 p-4 border rounded-lg bg-white shadow-sm">
+  <label className="block text-sm font-medium mb-2">Bulk Upload (CSV)</label>
+  <input
+    type="file"
+    accept=".csv"
+    onChange={(e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        const csv = event.target?.result;
+        if (typeof csv !== "string") return;
+
+        Papa.parse(csv, {
+          header: true,
+          skipEmptyLines: true,
+          complete: async (results) => {
+            try {
+             const parsedItems = results.data
+            .filter((item: any) => item.name && item.cost)
+            .map((item: any) => ({
+              name: item.name?.trim(),
+              description: item.description?.trim() || "",
+              category: item.category?.trim() || "Uncategorized",
+              cost: Number(item.cost),
+              available: String(item.available).toLowerCase() === "true", // 👈 clean boolean coercion
+            }));
+
+              console.log(parsedItems);
+              
+              const res = await api.post("/bulkUploadMenu", parsedItems);
+              toast.success("Bulk upload successful!");
+              fetchMenu(); // refresh menu
+            } catch (err) {
+              console.error(err);
+              toast.error("Bulk upload failed");
+            }
+          },
+        });
+      };
+
+      reader.readAsText(file);
+    }}
+    className="input border border-gray-300 rounded px-3 py-2"
+  />
+  <p className="text-xs text-gray-500 mt-1">CSV must have headers: name, description, category, cost</p>
+</div>
+
 
 
       {loading ? (

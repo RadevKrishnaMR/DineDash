@@ -19,6 +19,15 @@ export interface OrderItem {
   };
 }
 
+export interface Invoice {
+  id: number;
+  pdfUrl: string;
+  totalAmount: number;
+  discount: number;
+  isPaid: boolean;
+  paymentMode: 'UPI' | 'Online' | 'Cash';
+}
+
 
 export interface menuOrderItem {
   id?: number;
@@ -34,6 +43,7 @@ export interface Order {
   status: OrderStatus;
   table?: Table | null;
   orderItems: OrderItem[];
+  invoice?: Invoice | null;
 
 }
 

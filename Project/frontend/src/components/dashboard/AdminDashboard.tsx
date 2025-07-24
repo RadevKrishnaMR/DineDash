@@ -2,46 +2,47 @@ import { motion } from "framer-motion";
 import Card from "../ui/Card";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import axios from "axios";
+// import axios from "axios";
+import api from "../../api/authAPI";
 
 
 
 
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE; 
+// const API_BASE_URL = import.meta.env.VITE_API_BASE; 
 
-const api = axios.create({
-  // baseURL: "http://localhost:6321/api",
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+// const api = axios.create({
+//   // baseURL: "http://localhost:6321/api",
+//   baseURL: API_BASE_URL,
+//   headers: {
+//     'Content-Type': 'application/json',
+//   },
+// });
 
-// Request interceptor to add token to headers
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('dinedash_token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
+// // Request interceptor to add token to headers
+// api.interceptors.request.use(
+//   (config) => {
+//     const token = localStorage.getItem('dinedash_token');
+//     if (token) {
+//       config.headers.Authorization = `Bearer ${token}`;
+//     }
+//     return config;
+//   },
+//   (error) => Promise.reject(error)
+// );
 
-// Response interceptor to handle auth errors
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('dinedash_token');
-      localStorage.removeItem('dinedash_user');
-      window.location.href = '/login';
-    }
-    return Promise.reject(error);
-  }
-);
+// // Response interceptor to handle auth errors
+// api.interceptors.response.use(
+//   (response) => response,
+//   (error) => {
+//     if (error.response?.status === 401) {
+//       localStorage.removeItem('dinedash_token');
+//       localStorage.removeItem('dinedash_user');
+//       window.location.href = '/login';
+//     }
+//     return Promise.reject(error);
+//   }
+// );
 
 
 
@@ -61,28 +62,42 @@ export const  AdminDashboard = () => {
 
 const [noOrder,setNoOrder] = useState(0);
 const [noMenu,setNoMenu] = useState(0);
+const [totalrevenue, setotalReveneue] = useState(0)
  useEffect(() => {
- const fetchCounts = async ()=>{
-  try{
-    const [orderRes, menuRes] = await Promise.all([
-      api.get('/getAllOrder'),
-      api.get('/getMenu')
-    ]);
-    console.log("orderRes",orderRes, "menuRes",menuRes)
-    setNoOrder(orderRes.data.data.length || 0);
-    setNoMenu(menuRes.data.data.length || 0)
-  }catch(error){
-    console.log('Failed to fetch dashboard data', error);
-    
-  }
- };
- fetchCounts();
+  const fetchCounts = async () => {
+    try {
+      const [orderRes, menuRes, ] = await Promise.all([
+        api.get('/getAllOrder'),
+        api.get('/getMenu'),
+        
+      ]);
 
-  
+      setNoOrder(orderRes.data.data.length || 0);
+      setNoMenu(menuRes.data.data.length || 0);
+
+      
+      const invoiceRes = await api.get("/getInvoice")
+        const invoiceData = invoiceRes.data.data
+
+        if (invoiceData) {
+          const totalPaidAmount = invoiceData
+            .filter((invoice: any) => invoice.isPaid)
+            .reduce((sum: number, invoice: any) => sum + Number(invoice.totalAmount), 0);
+          setotalReveneue(totalPaidAmount)
+         }
+
+      
+
+    } catch (error) {
+      console.log('Failed to fetch dashboard data', error);
+    }
+  };
+
+  fetchCounts();
 }, []);
 
   const stats: StatCard[] = [
-    { title: "Total Revenue", value: "$12,345", icon: "💰", color: "border-blue-500", path: '/'},
+    { title: "Total Revenue", value: `₹${Number(totalrevenue || 0).toFixed(2)}`, icon: "💰", color: "border-blue-500", path: ''},
     { title: `Menu Item`, value: `${noMenu}`, icon: "🍽️", color: "border-purple-500", path: '/menu' },
     { title: 'Order', value: `${noOrder}`, icon: "📦", color: "border-yellow-500", path: '/order' },
   ];
@@ -154,7 +169,7 @@ const [noMenu,setNoMenu] = useState(0);
             {[
               { icon: '➕', title: 'Add Menu Item', action: () => {handleCardClick('/menu')} },
               { icon: '👨‍🍳', title: 'Manage Staff', action: () => {} },
-              { icon: '📊', title: 'View Reports', action: () => {} },
+              { icon: '📊', title: 'View Reports', action: () => {handleCardClick('/order')} },
               
             ].map((action, i) => (
               <motion.button

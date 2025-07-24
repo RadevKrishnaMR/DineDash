@@ -9,6 +9,9 @@ import Footer from '../components/Footer/Footer';
 import OrdersPage from '../pages/dashboard/OrderPage';
 import MenuPage from '../pages/dashboard/MenuPage';
 import InvoiceDashboard from '../pages/dashboard/InvoicePage';
+import MakeOrderForm from '../pages/dashboard/MakeOrder';
+import GenerateInvoiceModal from '../pages/dashboard/GenerateinvoiceModal';
+import { useParams, useNavigate } from 'react-router-dom';
 
 // Lazy load all dashboards
 const Login = lazy(() => import('../pages/auth/Login'));
@@ -19,6 +22,26 @@ const AdminDashboard = lazy(() => import('../components/dashboard/AdminDashboard
 const CashierDashboard = lazy(() => import('../components/dashboard/CashierDashboard'));
 const WaiterDashboard = lazy(() => import('../components/dashboard/WaiterDashboard'));
 const KitchenDashboard = lazy(() => import('../components/dashboard/KitchenDashboard'));
+
+const GenerateInvoiceWrapper = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+
+  const handleClose = () => navigate(-1); // or navigate('/orders')
+  const handleSuccess = () => {
+    // Do something on success
+    navigate('/orders'); // or refresh page etc.
+  };
+
+  return (
+    <GenerateInvoiceModal
+      orderId={id}
+      onClose={handleClose}
+      onSuccess={handleSuccess}
+    />
+  );
+};
+
 
 const AppRoutes = () => {
   return (
@@ -84,6 +107,9 @@ const AppRoutes = () => {
         <Route path="/order" element={<OrdersPage/>} />
         <Route path="/menu" element={<MenuPage/>} />
         <Route path="/invoice/:id" element={<InvoiceDashboard/>} />
+        <Route path="/makeOrder" element={<MakeOrderForm/>} />
+        <Route path="/generateInvoice/:id" element={<GenerateInvoiceWrapper />} />
+
       </Routes>
     </Suspense>
   );
