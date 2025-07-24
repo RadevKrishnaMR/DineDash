@@ -4,7 +4,9 @@ import {NextFunction, Request, Response} from 'express'
 import { isValidOrderStatus, isValidOrderType } from "../utils";
 import { ApiError } from "../utils/ApiError";
 import chalk from "chalk";
-import { OrderType } from "../models";
+import { io } from "../app";
+
+// import { OrderType } from "../models";
 
 
 
@@ -115,6 +117,13 @@ export const makeOrder = async(req: Request, res: Response, next: NextFunction):
 
 
             })
+            try{
+                io.emit('new-order',fullOrder)
+                console.log("io send succefully")
+            }catch(err){
+                console.log(chalk.red("Error occured while socket transmissin", err))
+            }
+            
             await queryRunner.commitTransaction()
             return 
 
@@ -312,7 +321,8 @@ export const getFilteredOrders = async (req: Request, res: Response, next: NextF
         .createQueryBuilder('order')
         .leftJoinAndSelect('order.orderItems','orderItems')
         .leftJoinAndSelect('orderItems.item','item')
-        .leftJoinAndSelect('order.table','table');
+        .leftJoinAndSelect('order.table','table')
+        .leftJoinAndSelect('order.invoice','invoice');
 
         const {orderType, status, itemId, category} = req.query;
 

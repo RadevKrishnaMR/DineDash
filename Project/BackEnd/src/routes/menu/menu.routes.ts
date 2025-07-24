@@ -1,10 +1,11 @@
 import {Router} from 'express'
 import { menuPath } from '../route.dir';
-import { addMenu, deleteItem, getMenu } from '../../controllers/menu.controller';
+import { addMenu, deleteItem, getMenu, bulkuploadItem } from '../../controllers/menu.controller';
 
 
 export const menuRouter = Router();
 
 menuRouter.get(menuPath.GETMENU,getMenu);
 menuRouter.post(menuPath.ADDMENU,addMenu);
-menuRouter.delete(menuPath.DELETEMENU,deleteItem)
+menuRouter.delete(menuPath.DELETEMENU,deleteItem);
+menuRouter.post('/bulkUploadMenu',bulkuploadItem)

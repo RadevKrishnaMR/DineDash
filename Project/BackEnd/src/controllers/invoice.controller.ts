@@ -15,14 +15,19 @@ export const generateInvoice = async(req: Request, res: Response, next: NextFunc
     try{
         const orderRepo = AppDataSource.getRepository(Order)
         const invoiceRepo = AppDataSource.getRepository(Invoice)
-        let tax = process.env.TAX
+        
         const {id} = req.params
         const {reqDiscount,paymentMode, isPaid} = req.body
         const orderId = Number(id)
+        let tax = Number(process.env.TAX || 0);
+            if (isNaN(tax) || tax < 0 || tax > 100) {
+            tax = 0; // Or throw an error, your choice
+            }
 
-        if(reqDiscount){
-            tax = reqDiscount
-        }
+
+        // if(reqDiscount){
+        //     discount = reqDiscount
+        // }
 
         if(!isValidCategory(paymentMode)){
             throw new ApiError(404,"Invalid or missing Payment mode")
@@ -61,25 +66,28 @@ export const generateInvoice = async(req: Request, res: Response, next: NextFunc
         if (isNaN(discount) || discount < 0 || discount > 100) {
             throw new ApiError(400, "Invalid discount value, must be between 0 and 100");
         }
+        console.log("Discount is : ",discount);
+        
 
                 const calculatedCost = (totalCost * (100 - discount))/ 100
-                const finalCost = (calculatedCost * (100 + Number(tax)))/100 ;
+                const finalCost = (calculatedCost * (100 + tax))/100 ;
 
         const fileName = `invoice_order_${currentOrder.id}_${Date.now()}.pdf`;
-        const filePath = await createInvoicePDF(
-            {
-                orderId: currentOrder.id,
-                totalAmount: finalCost,
-                discount,
-                paymentMode,
-                items: currentItems.map(item => ({
-                    name: item.item.name,
-                    quantity: item.quantity,
-                    cost: item.item.cost,
-                })),
-            },
-            fileName
-        );
+        const filePath = await createInvoicePDF({
+    orderId: currentOrder.id,
+    subtotal: totalCost,
+    discount:discount,
+    tax,
+    finalCost,
+    paymentMode,
+    items: currentItems.map(item => ({
+        name: item.item.name,
+        quantity: item.quantity,
+        cost: item.item.cost,
+    })),
+}, fileName);
+
+
 
         // Assuming you serve files via /invoices static route
         const invoiceUrl = `/invoices/${fileName}`;

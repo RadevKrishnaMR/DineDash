@@ -1,6 +1,7 @@
 import { Entity, Column, PrimaryGeneratedColumn, OneToOne, JoinColumn, OneToMany } from "typeorm";
 import { Table } from "./Table";
 import { OrderItems } from "./OrderItem";
+import { Invoice } from "./Invoice";
 
 
 export enum OrderType{
@@ -43,5 +44,12 @@ export class Order{
 
     @OneToMany(()=> OrderItems, (orderItem)=> orderItem.order )
     orderItems!: OrderItems[]
+
+    @OneToOne(()=> Invoice, invoice => invoice.order,{
+        nullable: true,
+        cascade: true,
+    })
+    invoice?: Invoice
+
     
 }

@@ -118,5 +118,30 @@ export const deleteItem = async(req: Request, res: Response, next: NextFunction)
     
 }
 
+export const bulkuploadItem = async (req: Request, res: Response, next:NextFunction):Promise<void> => {
+  const items = req.body; // array of menu items
+  try {
+    const menuRepo = AppDataSource.getRepository(Items);
+    
+    // insert all items (no validation)
+    const result = await menuRepo.insert(items); 
+    
+    res.status(200).json({
+      success: true,
+      data: result,
+      message: "Bulk upload successful",
+    });
+    return 
+
+  } catch(err){
+        console.log(chalk.red("Unexpected server error occured", err))
+        if (err instanceof ApiError) {
+            return next(err);
+        }
+        return next(new ApiError(500, "Unexpected server error occurred"));
+
+    }
+};
+
 
 

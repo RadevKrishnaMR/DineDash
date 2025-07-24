@@ -1,5 +1,5 @@
 import 'dotenv/config'
-import { app } from './app'
+import { server } from './app'
 import { AppDataSource, TestDataSource } from './config/data.config'
 import chalk from 'chalk'
 
@@ -15,7 +15,7 @@ const startServer = async () => {
         await AppDataSource.initialize();
         console.log(chalk.yellowBright("DATA SOURCE INITIALIZED"));
 
-        app.listen(PORT,()=>{
+        server.listen(PORT,()=>{
             console.log(chalk.blueBright(`THE SERVER IS RUNNING IN ${PORT}`))
         })
 

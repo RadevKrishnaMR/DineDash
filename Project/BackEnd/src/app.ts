@@ -1,5 +1,7 @@
 import express from 'express';
-import 'dotenv/config'
+import 'dotenv/config';
+import http from 'http';
+import {Server as SocketIOServer} from 'socket.io'
 import { authRouter } from './routes/auth/auth.routes';
 import { Response, Request, NextFunction } from 'express';
 import { ApiError } from './utils/ApiError';
@@ -10,7 +12,7 @@ import { authenticateJWT } from './middlewares/auth.middleware';
 import path from 'path';
 import cors from 'cors';
 
-export const app = express()
+ const app = express()
 console.log(process.env.FRONT_URL);
 
 const corsOption={
@@ -33,6 +35,8 @@ app.use('/api',authenticateJWT,invoiceRouter)
 app.use('/api',authenticateJWT,menuRouter)
 app.use('/api',authenticateJWT,tableRouter)
 
+
+//Global error handler
 app.use((err:any, req: Request, res: Response, next: NextFunction)=>{
     const statusCode = err instanceof ApiError ? err.statusCode: 500;
     const message = err.message || "Internal Server Error";
@@ -43,3 +47,33 @@ app.use((err:any, req: Request, res: Response, next: NextFunction)=>{
     })
 })
 
+
+// ===========================
+// 🧠 SOCKET.IO SETUP SECTION
+// ===========================
+
+// Create HTTP server from app
+const server = http.createServer(app);
+
+// Create Socket.io instance
+ const io = new SocketIOServer(server, {
+  cors: {
+    origin: process.env.FRONT_URL,
+    methods: ['GET', 'POST'],
+    credentials: true,
+  },
+});
+
+// Define socket behavior
+io.on('connection', (socket) => {
+  console.log(`🟢 New client connected: ${socket.id}`);
+
+  socket.on('disconnect', () => {
+    console.log(`🔴 Client disconnected: ${socket.id}`);
+  });
+});
+
+// ===========================
+// Export the server (for index.ts to run)
+// ===========================
+export { app,server,io };

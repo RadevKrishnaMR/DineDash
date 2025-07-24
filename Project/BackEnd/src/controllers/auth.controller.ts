@@ -45,7 +45,7 @@ export const login = async (req: Request, res: Response): Promise<void> =>{
         
         res.cookie('refreshToken', tokens.refreshToken ,{
             httpOnly: true,
-            maxAge: 1000 * 60 * 40,
+            maxAge: 1000* 60 * 60 * 24 * 7,
             sameSite: 'lax',        // "lax" for localhost; "none" if you're using HTTPS + cross-origin
             secure: false 
         })
@@ -57,7 +57,7 @@ export const login = async (req: Request, res: Response): Promise<void> =>{
             }
             
         })
-        console.log("userlogged in", userFound, "cookie created",tokens,refreshToken )
+        // console.log("userlogged in", userFound, "cookie created",tokens,refreshToken )
         return
 
     }catch (err: any) {
@@ -127,7 +127,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
         
         res.cookie('refreshToken', tokens.refreshToken ,{
             httpOnly: true,
-            maxAge: 1000 * 60 * 40,
+            maxAge: 1000* 60 * 60 * 24 * 7,
             sameSite: 'lax',        // "lax" for localhost; "none" if you're using HTTPS + cross-origin
             secure: false 
 
@@ -140,7 +140,7 @@ export const register = async (req: Request, res: Response): Promise<void> => {
             }
             
         })
-         console.log("user registered in", userFound, "cookie created",tokens,refreshToken )
+        //  console.log("user registered in", userFound, "cookie created",tokens,refreshToken )
         return 
 
     }catch (err: any) {
@@ -196,7 +196,7 @@ export const refreshToken = async (req: Request, res: Response): Promise<void>=>
     
         res.cookie("refreshToken",tokens.refreshToken,{
             httpOnly: true,
-            maxAge: 1000* 60 * 10,
+            maxAge: 1000* 60 * 60 * 24 * 7,
             sameSite: 'lax',        // "lax" for localhost; "none" if you're using HTTPS + cross-origin
             secure: false 
         }).json({
